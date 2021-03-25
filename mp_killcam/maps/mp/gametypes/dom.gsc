@@ -752,7 +752,10 @@ default_onTimeLimit()
 	// i think these two lines are obsolete
 	makeDvarServerInfo( "ui_text_endreason", game["strings"]["time_limit_reached"] );
 	setDvar( "ui_text_endreason", game["strings"]["time_limit_reached"] );
-	
+for ( i = 0; i < level.domFlags.size; i++ )
+	{
+		level.domFlags[i] maps\mp\gametypes\_gameobjects::allowUse( "none" );
+	}
 	thread maps\mp\gametypes\_finalkills::endGame( winner, game["strings"]["time_limit_reached"] );
 }
 
@@ -786,6 +789,10 @@ default_onScoreLimit()
 	setDvar( "ui_text_endreason", game["strings"]["score_limit_reached"] );
 	
 	level.forcedEnd = true; // no more rounds if scorelimit is hit
+for ( i = 0; i < level.domFlags.size; i++ )
+	{
+		level.domFlags[i] maps\mp\gametypes\_gameobjects::allowUse( "none" );
+	}
 	thread maps\mp\gametypes\_finalkills::endGame( winner, game["strings"]["score_limit_reached"] );
 }
 
