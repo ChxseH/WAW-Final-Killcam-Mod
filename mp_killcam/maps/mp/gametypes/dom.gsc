@@ -93,7 +93,9 @@ main()
 	level.onSpawnPlayerUnified = ::onSpawnPlayerUnified;
 	level.onPlayerKilled = ::onPlayerKilled;
 	level.onPrecacheGameType = ::onPrecacheGameType;
-	level.onEndGame= ::onEndGame;
+    level.onTimeLimit = ::default_onTimeLimit;
+	level.onScoreLimit = ::default_onScoreLimit;
+	//level.onEndGame= ::onEndGame;
 
 	game["dialog"]["gametype"] = "domination";
 	game["dialog"]["offense_obj"] = "capture_objs";
@@ -289,13 +291,13 @@ onSpawnPlayer()
 	self spawn(spawnpoint.origin, spawnpoint.angles);
 }
 
-onEndGame( winningTeam )
-{
-	for ( i = 0; i < level.domFlags.size; i++ )
-	{
-		level.domFlags[i] maps\mp\gametypes\_gameobjects::allowUse( "none" );
-	}
-}
+//onEndGame( winningTeam )
+//{
+//	for ( i = 0; i < level.domFlags.size; i++ )
+//	{
+//		level.domFlags[i] maps\mp\gametypes\_gameobjects::allowUse( "none" );
+//	}
+//}
 
 domFlags()
 {
@@ -692,7 +694,7 @@ updateDomScores()
 		if ( numFlags )
 			[[level._setTeamScore]]( "axis", [[level._getTeamScore]]( "axis" ) + numFlags );
 
-		level.endGameOnScoreLimit = true;
+		level.endGameOnScoreLimit = true; // this allows the game to end, now we need to run the killcams?
 		maps\mp\gametypes\_globallogic::checkScoreLimit();
 		level.endGameOnScoreLimit = false;
 		wait ( 5.0 );
@@ -702,6 +704,7 @@ updateDomScores()
 
 onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHitLoc, psOffsetTime, deathAnimDuration )
 {
+thread maps\mp\gametypes\_finalkills::onPlayerKilled(eInflictor, attacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHitLoc, psOffsetTime, deathAnimDuration);
 	if ( self.touchTriggers.size && isPlayer( attacker ) && attacker.pers["team"] != self.pers["team"] )
 	{
 		triggerIds = getArrayKeys( self.touchTriggers );
@@ -721,7 +724,70 @@ onPlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHi
 	}
 }
 
+default_onTimeLimit()
+{
+	winner = undefined;
+	
+	if ( level.teamBased )
+	{
+		if ( game["teamScores"]["allies"] == game["teamScores"]["axis"] )
+			winner = "tie";
+		else if ( game["teamScores"]["axis"] > game["teamScores"]["allies"] )
+			winner = "axis";
+		else
+			winner = "allies";
 
+		logString( "time limit, win: " + winner + ", allies: " + game["teamScores"]["allies"] + ", opfor: " + game["teamScores"]["axis"] );
+	}
+	else
+	{
+		winner = maps\mp\gametypes\_globallogic::getHighestScoringPlayer();
+
+		if ( isDefined( winner ) )
+			logString( "time limit, win: " + winner.name );
+		else
+			logString( "time limit, tie" );
+	}
+	
+	// i think these two lines are obsolete
+	makeDvarServerInfo( "ui_text_endreason", game["strings"]["time_limit_reached"] );
+	setDvar( "ui_text_endreason", game["strings"]["time_limit_reached"] );
+	
+	thread maps\mp\gametypes\_finalkills::endGame( winner, game["strings"]["time_limit_reached"] );
+}
+
+default_onScoreLimit()
+{
+	if ( !level.endGameOnScoreLimit )
+		return;
+
+	winner = undefined;
+	
+	if ( level.teamBased )
+	{
+		if ( game["teamScores"]["allies"] == game["teamScores"]["axis"] )
+			winner = "tie";
+		else if ( game["teamScores"]["axis"] > game["teamScores"]["allies"] )
+			winner = "axis";
+		else
+			winner = "allies";
+		logString( "scorelimit, win: " + winner + ", allies: " + game["teamScores"]["allies"] + ", opfor: " + game["teamScores"]["axis"] );
+	}
+	else
+	{
+		winner = maps\mp\gametypes\_globallogic::getHighestScoringPlayer();
+		if ( isDefined( winner ) )
+			logString( "scorelimit, win: " + winner.name );
+		else
+			logString( "scorelimit, tie" );
+	}
+	
+	makeDvarServerInfo( "ui_text_endreason", game["strings"]["score_limit_reached"] );
+	setDvar( "ui_text_endreason", game["strings"]["score_limit_reached"] );
+	
+	level.forcedEnd = true; // no more rounds if scorelimit is hit
+	thread maps\mp\gametypes\_finalkills::endGame( winner, game["strings"]["score_limit_reached"] );
+}
 
 getTeamFlagCount( team )
 {
