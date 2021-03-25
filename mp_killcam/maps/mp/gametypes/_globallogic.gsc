@@ -1103,14 +1103,14 @@ setThirdPerson( value )
 		if ( value )
 		{
 			self setClientDvar( "cg_thirdPerson", "1" );
-			self setDepthOfField( 0, 128, 512, 4000, 6, 1.8 );
-			self setClientDvar( "cg_fov", "40" );
+			//self setDepthOfField( 0, 128, 512, 4000, 6, 1.8 );
+			//self setClientDvar( "cg_fov", "40" );
 		}
 		else
 		{
 			self setClientDvar( "cg_thirdPerson", "0" );
-			self setDepthOfField( 0, 0, 512, 4000, 4, 0 );
-			self setClientDvar( "cg_fov", "65" );
+			//self setDepthOfField( 0, 0, 512, 4000, 4, 0 );
+			//self setClientDvar( "cg_fov", "65" );
 		}
 	}
 }
@@ -1322,8 +1322,9 @@ hostIdledOut()
 
 endGame( winner, endReasonText )
 {
-	if(getDvar("g_gametype") == "dm" || getDvar("g_gametype") == "sab" || getDvar("g_gametype") == "tdm") { 
+	if(getDvar("g_gametype") == "dm" || getDvar("g_gametype") == "tdm") { 
 	// only these work with final killcams out of the box.
+	// Chase test
 		thread maps\mp\gametypes\_finalkills::endGame(winner, endReasonText);
 		return;
 	}
