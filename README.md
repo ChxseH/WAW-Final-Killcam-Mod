@@ -1,6 +1,6 @@
 ## Final Killcam for WAW!
 
-**Supported Gametypes:** TDM, DM, SD, SAB (Only 1 roundlimit).
+**Supported Gametypes:** TDM, DM, SD, SAB.
 
 ![Screenshot](https://i.imgur.com/vOHxlJT.jpg)
 
