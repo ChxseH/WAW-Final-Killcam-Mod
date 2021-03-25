@@ -73,7 +73,7 @@ main()
 	level.onRoundSwitch = ::onRoundSwitch;
 //	level.onScoreLimit = ::onScoreLimit;
 	level.onRoundEndGame = ::onRoundEndGame;
-	//level.onEndGame = ::onEndGame;
+	level.onEndGame = ::onEndGame;
 	level.onTeamOutcomeNotify = ::onTeamOutcomeNotify;
 
 //	level.endGameOnScoreLimit = false;
@@ -1104,9 +1104,4 @@ createFlagSpawnInfluencer( entityTeam )
 							 ctf_enemy_base_influencer_score,
 							 other_team_mask,
 							 maps\mp\gametypes\_spawning::get_score_curve_index(ctf_enemy_base_influencer_score_curve) );
-}
-
-sd_endGame( winningTeam, endReasonText )
-{
-	thread maps\mp\gametypes\_finalkills::endGame( winningTeam, endReasonText );
 }
