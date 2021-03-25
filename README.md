@@ -1,6 +1,6 @@
 ## Final Killcam for WAW!
 
-**Supported Gametypes:** TDM, DM, SD, SAB.
+**Unsupported Game Modes:** twar (War), ctf (Capture the Flag)
 
 ![Screenshot](https://i.imgur.com/vOHxlJT.jpg)
 
