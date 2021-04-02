@@ -1,45 +1,21 @@
 #include maps\mp\_utility;
 #include maps\mp\gametypes\_hud_util;
 #include maps\mp\gametypes\_spawning;
-/*
-	Sabotage
-	
-	// ...etc...
-*/
-
-/*QUAKED mp_sab_spawn_axis (0.75 0.0 0.5) (-16 -16 0) (16 16 72)
-Axis players spawn away from enemies and near their team at one of these positions.*/
-
-/*QUAKED mp_sab_spawn_allies (0.0 0.75 0.5) (-16 -16 0) (16 16 72)
-Allied players spawn away from enemies and near their team at one of these positions.*/
-
-/*QUAKED mp_sab_spawn_axis_start (1.0 0.0 0.5) (-16 -16 0) (16 16 72)
-Axis players spawn away from enemies and near their team at one of these positions at the start of a round.*/
-
-/*QUAKED mp_sab_spawn_allies_start (0.0 1.0 0.5) (-16 -16 0) (16 16 72)
-Allied players spawn away from enemies and near their team at one of these positions at the start of a round.*/
-
 main()
 {
 	if ( getdvar("mapname") == "mp_background" )
 		return;
-	
 	maps\mp\gametypes\_globallogic::init();
 	maps\mp\gametypes\_callbacksetup::SetupCallbacks();
 	maps\mp\gametypes\_globallogic::SetupCallbacks();
-	
-	// register sabotage spawn influencer callback
 	level.callbackPlayerSpawnGenerateInfluencers= ::sabPlayerSpawnGenerateInfluencers;
-	
 	level.teamBased = true;
 	level.overrideTeamScore = true;
-
 	maps\mp\gametypes\_globallogic::registerRoundSwitchDvar( level.gameType, 0, 0, 9 );
 	maps\mp\gametypes\_globallogic::registerTimeLimitDvar( level.gameType, 10, 0, 1440 );
 	maps\mp\gametypes\_globallogic::registerScoreLimitDvar( level.gameType, 0, 0, 500 );
 	maps\mp\gametypes\_globallogic::registerRoundLimitDvar( level.gameType, 1, 0, 10 );
 	maps\mp\gametypes\_globallogic::registerNumLivesDvar( level.gameType, 0, 0, 10 );
-
 	if ( !game["tiebreaker"] )
 	{
 		level.onPrecacheGameType = ::onPrecacheGameType;
@@ -49,9 +25,7 @@ main()
 		level.onTimeLimit = ::onTimeLimit;
 		level.onDeadEvent = ::onDeadEvent;
 		level.onRoundSwitch = ::onRoundSwitch;
-	
 		level.endGameOnScoreLimit = false;
-		
 		game["dialog"]["gametype"] = "sabotage";
 		game["dialog"]["offense_obj"] = "capture_objs";
 		game["dialog"]["defense_obj"] = "capture_objs";
@@ -63,36 +37,27 @@ main()
 		level.onStartGameType = ::onStartGameType;
 		level.onSpawnPlayer = ::onSpawnPlayer;
 		level.onSpawnPlayerUnified = ::onSpawnPlayerUnified;
-		//level.onEndGame = ::onEndGame;
-	
 		level.endGameOnScoreLimit = false;
-		
 		game["dialog"]["gametype"] = "sabotage";
 		game["dialog"]["offense_obj"] = "boost";
 		game["dialog"]["defense_obj"] = "boost";
 		game["dialog"]["sudden_death"] = "suddendeath";
 		game["dialog"]["sudden_death_boost"] = "suddendeath_boost";
-
 		maps\mp\gametypes\_globallogic::registerNumLivesDvar( "tb", 1, 1, 1 );
 		maps\mp\gametypes\_globallogic::registerTimeLimitDvar( "tb", 0, 0, 0 );
 	}
-
 	badtrig = getent( "sab_bomb_defuse_allies", "targetname" );
 	if ( isdefined( badtrig ) )
 		badtrig delete();
-
 	badtrig = getent( "sab_bomb_defuse_axis", "targetname" );
 	if ( isdefined( badtrig ) )
 		badtrig delete();
-
 	level.lastDialogTime = 0;
 }
-
 onPrecacheGameType()
 {
 	game["bomb_dropped_sound"] = "mp_war_objective_lost";
 	game["bomb_recovered_sound"] = "mp_war_objective_taken";
-	
 	precacheShader("waypoint_bomb");
 	precacheShader("waypoint_kill");
 	precacheShader("waypoint_bomb_enemy");
@@ -104,7 +69,6 @@ onPrecacheGameType()
 	precacheShader("compass_waypoint_defuse");
 	precacheShader("compass_waypoint_target");
 	precacheShader("hud_suitcase_bomb");
-	
 	precacheString(&"MP_EXPLOSIVES_RECOVERED_BY");
 	precacheString(&"MP_EXPLOSIVES_DROPPED_BY");
 	precacheString(&"MP_EXPLOSIVES_PLANTED_BY");
@@ -120,13 +84,10 @@ onPrecacheGameType()
 	precacheString(&"MP_NO_RESPAWN");
 	precacheString(&"MP_SUDDEN_DEATH");
 }
-
-
 onRoundSwitch()
 {
 	if ( !isdefined( game["switchedsides"] ) )
 		game["switchedsides"] = false;
-	
 	if ( game["teamScores"]["allies"] == level.scorelimit - 1 && game["teamScores"]["axis"] == level.scorelimit - 1 )
 	{
 		level.halftimeType = "overtime";
@@ -139,22 +100,16 @@ onRoundSwitch()
 		game["switchedsides"] = !game["switchedsides"];
 	}
 }
-
-
 onStartGameType()
 {
 	if ( !isdefined( game["switchedsides"] ) )
 		game["switchedsides"] = false;
-
 	setClientNameMode("auto_change");
-	
 	game["strings"]["target_destroyed"] = &"MP_TARGET_DESTROYED";
-
 	if ( !game["tiebreaker"] )
 	{
 		maps\mp\gametypes\_globallogic::setObjectiveText( "allies", &"OBJECTIVES_SAB" );
 		maps\mp\gametypes\_globallogic::setObjectiveText( "axis", &"OBJECTIVES_SAB" );
-	
 		if ( level.splitscreen )
 		{
 			maps\mp\gametypes\_globallogic::setObjectiveScoreText( "allies", &"OBJECTIVES_SAB" );
@@ -172,7 +127,6 @@ onStartGameType()
 	{
 		maps\mp\gametypes\_globallogic::setObjectiveText( "allies", &"OBJECTIVES_TDM" );
 		maps\mp\gametypes\_globallogic::setObjectiveText( "axis", &"OBJECTIVES_TDM" );
-		
 		if ( level.splitscreen )
 		{
 			maps\mp\gametypes\_globallogic::setObjectiveScoreText( "allies", &"OBJECTIVES_TDM" );
@@ -186,7 +140,6 @@ onStartGameType()
 		maps\mp\gametypes\_globallogic::setObjectiveHintText( "allies", &"OBJECTIVES_TDM_HINT" );
 		maps\mp\gametypes\_globallogic::setObjectiveHintText( "axis", &"OBJECTIVES_TDM_HINT" );
 	}
-	
 	level.spawnMins = ( 0, 0, 0 );
 	level.spawnMaxs = ( 0, 0, 0 );	
 	maps\mp\gametypes\_spawnlogic::placeSpawnPoints( "mp_sab_spawn_allies_start" );
@@ -194,54 +147,36 @@ onStartGameType()
 	maps\mp\gametypes\_spawnlogic::addSpawnPoints( "allies", "mp_sab_spawn_allies" );
 	maps\mp\gametypes\_spawnlogic::addSpawnPoints( "axis", "mp_sab_spawn_axis" );
 	maps\mp\gametypes\_spawning::updateAllSpawnPoints();
-	
 	level.mapCenter = maps\mp\gametypes\_spawnlogic::findBoxCenter( level.spawnMins, level.spawnMaxs );
 	setMapCenter( level.mapCenter );
-
 	level.spawn_axis = maps\mp\gametypes\_spawnlogic::getSpawnpointArray( "mp_sab_spawn_axis" );
 	level.spawn_allies = maps\mp\gametypes\_spawnlogic::getSpawnpointArray( "mp_sab_spawn_allies" );
 	level.spawn_axis_start = maps\mp\gametypes\_spawnlogic::getSpawnpointArray( "mp_sab_spawn_axis_start" );
 	level.spawn_allies_start = maps\mp\gametypes\_spawnlogic::getSpawnpointArray( "mp_sab_spawn_allies_start" );
-
 	maps\mp\gametypes\_rank::registerScoreInfo( "plant", 20 );
 	maps\mp\gametypes\_rank::registerScoreInfo( "defuse", 15 );
-
 	if ( game["tiebreaker"] )
 	{
 		allowed[0] = "tdm";
 		maps\mp\gametypes\_gameobjects::main(allowed);
-
-		// now that the game objects have been deleted place the influencers
 		maps\mp\gametypes\_spawning::create_map_placed_influencers();
-
 		return;
 	}
-
 	allowed[0] = "sab";
 	maps\mp\gametypes\_gameobjects::main(allowed);
-	
-	// now that the game objects have been deleted place the influencers
 	maps\mp\gametypes\_spawning::create_map_placed_influencers();
-
 	thread updateGametypeDvars();
-	
 	thread sabotage();
 }
-
-
 onTimeLimit()
 {
 	if ( level.inOvertime )
 		return;
-
 	thread onOvertime();
 }
-
-
 onOvertime()
 {
 	level endon ( "game_ended" );
-
 	level.timeLimitOverride = true;
 	level.inOvertime = true;
 	maps\mp\gametypes\_globallogic::leaderDialog( "sudden_death" );
@@ -250,7 +185,6 @@ onOvertime()
 	{
 		level.players[index] notify("force_spawn");
 		level.players[index] thread maps\mp\gametypes\_hud_message::oldNotifyMessage( &"MP_SUDDEN_DEATH", &"MP_NO_RESPAWN", undefined, (1, 0, 0), "mp_last_stand" );
-
 		level.players[index] setClientDvars("cg_deadChatWithDead", 1,
 							"cg_deadChatWithTeam", 0,
 							"cg_deadHearTeamLiving", 0,
@@ -258,7 +192,6 @@ onOvertime()
 							"cg_everyoneHearsEveryone", 0,
 							"g_compassShowEnemies", 1 );
 	}
-
 	waitTime = 0;
 	while ( waitTime < 90 )
 	{
@@ -269,21 +202,16 @@ onOvertime()
 		}
 		wait ( 1.0 );
 	}
-
 	sd_endGame( "tie", game["strings"]["tie"] );
 }
-
-
 onDeadEvent( team )
 {
 	if ( level.bombExploded )
 		return;
-		
 	if ( team == "all" )
 	{
 		if ( level.bombPlanted )
 		{
-			//[[level._setTeamScore]]( level.bombPlantedBy, [[level._getTeamScore]]( level.bombPlantedBy ) + 1 );
 			sd_endGame( level.bombPlantedBy, game["strings"][level.bombPlantedBy+"_mission_accomplished"] );
 		}
 		else
@@ -298,31 +226,24 @@ onDeadEvent( team )
 			level.plantingTeamDead = true;
 			return;
 		}
-			
-		//[[level._setTeamScore]]( level.bombPlantedBy, [[level._getTeamScore]]( level.bombPlantedBy ) + 1 );
 		sd_endGame( level.bombPlantedBy, game["strings"][level.otherTeam[level.bombPlantedBy]+"_eliminated"] );
 	}
 	else
 	{
-		//[[level._setTeamScore]]( level.otherTeam[team], [[level._getTeamScore]]( level.otherTeam[team] ) + 1 );
 		sd_endGame( level.otherTeam[team], game["strings"][team+"_eliminated"] );
 	}
 }
-
 onSpawnPlayerUnified()
 {
 	self.isPlanting = false;
 	self.isDefusing = false;
 	self.isBombCarrier = false;
-
 	if ( game["tiebreaker"] )
 	{
 		self thread maps\mp\gametypes\_hud_message::oldNotifyMessage( &"MP_TIE_BREAKER", &"MP_NO_RESPAWN", undefined, (1, 0, 0), "mp_last_stand" );
-	
 		hintMessage = maps\mp\gametypes\_globallogic::getObjectiveHintText( self.pers["team"] );
 		if ( isDefined( hintMessage ) )
 			self thread maps\mp\gametypes\_hud_message::hintMessage( hintMessage );
-	
 		self setClientDvars("cg_deadChatWithDead", 1,
 							"cg_deadChatWithTeam", 0,
 							"cg_deadHearTeamLiving", 0,
@@ -330,21 +251,16 @@ onSpawnPlayerUnified()
 							"cg_everyoneHearsEveryone", 0,
 							"g_compassShowEnemies", 1 );
 	}
-	
 	maps\mp\gametypes\_spawning::onSpawnPlayer_Unified();
 }
-
-
 onSpawnPlayer()
 {
 	self.isPlanting = false;
 	self.isDefusing = false;
 	self.isBombCarrier = false;
-
 	spawnteam = self.pers["team"];
 	if ( game["switchedsides"] )
 		spawnteam = getOtherTeam( spawnteam );
-
 	if ( level.useStartSpawns )
 	{
 		if (spawnteam == "axis")
@@ -359,15 +275,12 @@ onSpawnPlayer()
 		else
 			spawnpoint = maps\mp\gametypes\_spawnlogic::getSpawnpoint_NearTeam(level.spawn_allies);
 	}
-
 	if ( game["tiebreaker"] )
 	{
 		self thread maps\mp\gametypes\_hud_message::oldNotifyMessage( &"MP_TIE_BREAKER", &"MP_NO_RESPAWN", undefined, (1, 0, 0), "mp_last_stand" );
-	
 		hintMessage = maps\mp\gametypes\_globallogic::getObjectiveHintText( self.pers["team"] );
 		if ( isDefined( hintMessage ) )
 			self thread maps\mp\gametypes\_hud_message::hintMessage( hintMessage );
-	
 		self setClientDvars("cg_deadChatWithDead", 1,
 							"cg_deadChatWithTeam", 0,
 							"cg_deadHearTeamLiving", 0,
@@ -375,13 +288,9 @@ onSpawnPlayer()
 							"cg_everyoneHearsEveryone", 0,
 							"g_compassShowEnemies", 1 );
 	}
-
 	assert( isDefined(spawnpoint) );
-
 	self spawn( spawnpoint.origin, spawnpoint.angles );
 }
-
-
 updateGametypeDvars()
 {
 	level.plantTime = dvarFloatValue( "planttime", 5, 0, 20 );
@@ -389,29 +298,23 @@ updateGametypeDvars()
 	level.bombTimer = dvarFloatValue( "bombtimer", 45, 1, 300 );
 	level.hotPotato = dvarIntValue( "hotpotato", 1, 0, 1 );
 }
-
-
 sabotage()
 {
 	level.bombPlanted = false;
 	level.bombExploded = false;
-		
 	level._effect["bombexplosion"] = loadfx("maps/mp_maps/fx_mp_exp_bomb");
-
 	trigger = getEnt( "sab_bomb_pickup_trig", "targetname" );
 	if ( !isDefined( trigger ) ) 
 	{
 		error( "No sab_bomb_pickup_trig trigger found in map." );
 		return;
 	}
-
 	visuals[0] = getEnt( "sab_bomb", "targetname" );
 	if ( !isDefined( visuals[0] ) ) 
 	{
 		error( "No sab_bomb script_model found in map." );
 		return;
 	}
-	
 	precacheModel( "weapon_explosives" );	
 	visuals[0] setModel( "weapon_explosives" );
 	level.sabBomb = maps\mp\gametypes\_gameobjects::createCarryObject( "neutral", trigger, visuals, (0,0,32) );
@@ -429,7 +332,6 @@ sabotage()
 	level.sabBomb.objPoints["allies"].archived = true;
 	level.sabBomb.objPoints["axis"].archived = true;
 	level.sabBomb.autoResetTime = 60.0;
-	
 	if ( !isDefined( getEnt( "sab_bomb_axis", "targetname" ) ) ) 
 	{
 		error("No sab_bomb_axis trigger found in map.");
@@ -440,7 +342,6 @@ sabotage()
 		error("No sab_bomb_allies trigger found in map.");
 		return;
 	}
-
 	if ( game["switchedsides"] )
 	{
 		level.bombZones["allies"] = createBombZone( "allies", getEnt( "sab_bomb_axis", "targetname" ) );
@@ -452,12 +353,9 @@ sabotage()
 		level.bombZones["axis"] = createBombZone( "axis", getEnt( "sab_bomb_axis", "targetname" ) );
 	}
 }
-
-
 createBombZone( team, trigger )
 {
 	visuals = getEntArray( trigger.target, "targetname" );
-	
 	bombZone = maps\mp\gametypes\_gameobjects::createUseObject( team, trigger, visuals, (0,0,64) );
 	bombZone resetBombsite();
 	bombZone.onUse = ::onUse;
@@ -465,7 +363,6 @@ createBombZone( team, trigger )
 	bombZone.onEndUse = ::onEndUse;
 	bombZone.onCantUse = ::onCantUse;
 	bombZone.useWeapon = "briefcase_bomb_mp";
-	
 	for ( i = 0; i < visuals.size; i++ )
 	{
 		if ( isDefined( visuals[i].script_exploder ) )
@@ -474,14 +371,10 @@ createBombZone( team, trigger )
 			break;
 		}
 	}
-	
 	return bombZone;
 }
-
-
 onBeginUse( player )
 {
-	// planted the bomb
 	if ( !self maps\mp\gametypes\_gameobjects::isFriendlyTeam( player.pers["team"] ) )
 	{
 		player.isPlanting = true;
@@ -493,49 +386,35 @@ onBeginUse( player )
 		player thread maps\mp\gametypes\_battlechatter_mp::gametypeSpecificBattleChatter( "sd_enemyplant", player.pers["team"] );
 	}
 }
-
 onEndUse( team, player, result )
 {
 	if ( !isAlive( player ) )
 		return;
-	
 	player.isPlanting = false;
 	player.isDefusing = false;
 	player notify( "event_ended" );
 }
-
-
 onPickup( player )
 {
 	level notify ( "bomb_picked_up" );
-	
 	self.autoResetTime = 60.0;
-	
 	level.useStartSpawns = false;
-	
 	team = player.pers["team"];
-	
 	if ( team == "allies" )
 		otherTeam = "axis";
 	else
 		otherTeam = "allies";
-	
-	//player iPrintLnBold( &"MP_YOU_HAVE_RECOVERED_THE_BOMB" );
 	player playLocalSound( "mp_suitcase_pickup" );
 	player logString( "bomb taken" );
-	
 	player maps\mp\gametypes\_globallogic::leaderDialogOnPlayer( "obj_destroy", "bomb" );
 	excludeList[0] = player;
-
 	if( getTime() - level.lastDialogTime > 10000 )
 	{
-		//check if we want to do the squad line
 		squadID = getplayersquadid( player );
 		if( isDefined( squadID ) )
 			maps\mp\gametypes\_globallogic::leaderDialog( "bomb_taken", team, "bomb", excludeList, "squad_bomb", squadID );
 		else
 			maps\mp\gametypes\_globallogic::leaderDialog( "bomb_taken", team );
-
 		if ( !level.splitscreen )
 		{
 			maps\mp\gametypes\_globallogic::leaderDialog( "bomb_lost", otherTeam );
@@ -544,8 +423,6 @@ onPickup( player )
 		level.lastDialogTime = getTime();
 	}
 	player.isBombCarrier = true;
-	
-	// recovered the bomb before abandonment timer elapsed
 	if ( team == self maps\mp\gametypes\_gameobjects::getOwnerTeam() )
 	{
 		printOnTeamArg( &"MP_EXPLOSIVES_RECOVERED_BY", team, player );
@@ -554,95 +431,67 @@ onPickup( player )
 	else
 	{
 		printOnTeamArg( &"MP_EXPLOSIVES_RECOVERED_BY", team, player );
-//		printOnTeamArg( &"MP_EXPLOSIVES_RECOVERED_BY", otherTeam, &"MP_THE_ENEMY" );
 		playSoundOnPlayers( game["bomb_recovered_sound"] );
 	}
-	
 	self maps\mp\gametypes\_gameobjects::setOwnerTeam( team );
 	self maps\mp\gametypes\_gameobjects::setVisibleTeam( "any" );
 	self maps\mp\gametypes\_gameobjects::set2DIcon( "enemy", "compass_waypoint_target" );
 	self maps\mp\gametypes\_gameobjects::set3DIcon( "enemy", "waypoint_kill" );
 	self maps\mp\gametypes\_gameobjects::set2DIcon( "friendly", "compass_waypoint_defend" );
 	self maps\mp\gametypes\_gameobjects::set3DIcon( "friendly", "waypoint_defend" );
-		
 	level.bombZones[team] maps\mp\gametypes\_gameobjects::setVisibleTeam( "none" );
 	level.bombZones[otherTeam] maps\mp\gametypes\_gameobjects::setVisibleTeam( "any" );
 }
-
-
 onDrop( player )
 {
 	if ( level.bombPlanted )
 	{
-		
 	}
 	else
 	{
 		if ( isDefined( player ) )
 			printOnTeamArg( &"MP_EXPLOSIVES_DROPPED_BY", self maps\mp\gametypes\_gameobjects::getOwnerTeam(), player );
-//		else
-//			printOnTeamArg( &"MP_EXPLOSIVES_DROPPED_BY", self maps\mp\gametypes\_gameobjects::getOwnerTeam(), &"MP_YOUR_TEAM" );
-	
 		playSoundOnPlayers( game["bomb_dropped_sound"], self maps\mp\gametypes\_gameobjects::getOwnerTeam() );
 		if ( isDefined( player ) )
 			player logString( "bomb dropped" );
 		else
 			logString( "bomb dropped" );
-			
-//		maps\mp\gametypes\_globallogic::leaderDialog( "bomb_lost", player.pers["team"] );
-
 		player notify( "event_ended" );
-
 		thread abandonmentThink( 0.0 );
 	}
 }
-
-
 abandonmentThink( delay )
 {
 	level endon ( "bomb_picked_up" );
-	
 	wait ( delay );
-
 	if ( isDefined( self.carrier ) )
 		return;
-
 	if ( self maps\mp\gametypes\_gameobjects::getOwnerTeam() == "allies" )
 		otherTeam = "axis";
 	else
 		otherTeam = "allies";
-
-//	printOnTeamArg( &"MP_EXPLOSIVES_DROPPED_BY", otherTeam, &"MP_THE_ENEMY" );
 	playSoundOnPlayers( game["bomb_dropped_sound"], otherTeam );
-
 	self maps\mp\gametypes\_gameobjects::setOwnerTeam( "neutral" );
 	self maps\mp\gametypes\_gameobjects::setVisibleTeam( "any" );
 	self maps\mp\gametypes\_gameobjects::set2DIcon( "enemy", "compass_waypoint_bomb" );
 	self maps\mp\gametypes\_gameobjects::set3DIcon( "enemy", "waypoint_bomb" );
 	self maps\mp\gametypes\_gameobjects::set2DIcon( "friendly", "compass_waypoint_bomb" );
 	self maps\mp\gametypes\_gameobjects::set3DIcon( "friendly", "waypoint_bomb" );
-
 	level.bombZones["allies"] maps\mp\gametypes\_gameobjects::setVisibleTeam( "none" );
 	level.bombZones["axis"] maps\mp\gametypes\_gameobjects::setVisibleTeam( "none" );		
 }
-
-
 onUse( player )
 {
 	team = player.pers["team"];
 	otherTeam = level.otherTeam[team];
-	// planted the bomb
-
 	lpselfnum = player getEntityNumber();
 	lpGuid = player getGuid();
-
 	if ( !self maps\mp\gametypes\_gameobjects::isFriendlyTeam( player.pers["team"] ) )
 	{
 		player notify ( "bomb_planted" );
 		player playSound( "mp_bomb_plant" );
 		player logString( "bomb planted" );
 		logPrint("BP;" + lpGuid + ";" + lpselfnum + ";" + player.name + "\n");
-
 		if ( !level.hardcoreMode )
 		{
 			printBoldOnTeamArg( &"MP_EXPLOSIVES_PLANTED_BY", team, player );
@@ -650,73 +499,51 @@ onUse( player )
 		}
 		iPrintLn( &"MP_EXPLOSIVES_PLANTED_BY", player );
 		thread playSoundOnPlayers( "mx_SAB_planted"+"_"+level.teamPrefix[team] );
-
-		//check if we want to do the squad line
 		squadID = getplayersquadid( player );
 		if( isDefined( squadID ) )
 			maps\mp\gametypes\_globallogic::leaderDialog( "bomb_planted", team, undefined, undefined, "squad_plant",squadID );
 		else
 			maps\mp\gametypes\_globallogic::leaderDialog( "bomb_planted", team );
-
 		maps\mp\gametypes\_globallogic::leaderDialog( "bomb_planted", otherTeam );
-
 		maps\mp\gametypes\_globallogic::givePlayerScore( "plant", player );
 		player thread [[level.onXPEvent]]( "plant" );
-		
 		level thread bombPlanted( self, player.pers["team"] );
-
 		level.bombOwner = player;
-		
 		player.isBombCarrier = false;
-
-//		self.keyObject maps\mp\gametypes\_gameobjects::disableObject();
 		level.sabBomb.autoResetTime = undefined;
 		level.sabBomb maps\mp\gametypes\_gameobjects::allowCarry( "none" );
 		level.sabBomb maps\mp\gametypes\_gameobjects::setVisibleTeam( "none" );
 		level.sabBomb maps\mp\gametypes\_gameobjects::setDropped();
 		self.useWeapon = "briefcase_bomb_defuse_mp";
-		
 		self setUpForDefusing();
 	}
-	else // defused the bomb
+	else 
 	{
 		player notify ( "bomb_defused" );
 		player logString( "bomb defused" );
-
 		logPrint("BD;" + lpGuid + ";" + lpselfnum + ";" + player.name + "\n");
-
 		if ( !level.hardcoreMode )
 			iPrintLn( &"MP_EXPLOSIVES_DEFUSED_BY", player );
 		thread playSoundOnPlayers( "mx_SAB_defused"+"_"+level.teamPrefix[team] );
 		maps\mp\gametypes\_globallogic::leaderDialog( "bomb_defused" );
-
 		player setStatLBByName( "sabotage", 1, "Targets Defused" );
-		
 		maps\mp\gametypes\_globallogic::givePlayerScore( "defuse", player );
 		player thread [[level.onXPEvent]]( "defuse" );
-
 		level thread bombDefused( self );
-		
 		if ( level.inOverTime && isDefined( level.plantingTeamDead ) )
 		{
 			sd_endGame( player.pers["team"], game["strings"][level.bombPlantedBy+"_eliminated"] );
 			return;
 		}
-		
 		self resetBombsite();
-		
 		level.sabBomb maps\mp\gametypes\_gameobjects::allowCarry( "any" );
 		level.sabBomb maps\mp\gametypes\_gameobjects::setPickedUp( player );
 	}
 }
-
-
 onCantUse( player )
 {
 	player iPrintLnBold( &"MP_CANT_PLANT_WITHOUT_BOMB" );
 }
-
-
 bombPlanted( destroyedObj, team )
 {
 	maps\mp\gametypes\_globallogic::pauseTimer();
@@ -724,18 +551,12 @@ bombPlanted( destroyedObj, team )
 	level.bombPlantedBy = team;
 	level.timeLimitOverride = true;
 	setDvar( "ui_bomb_timer", 1 );
-	
-	// communicate timer information to menus
 	setGameEndTime( int( getTime() + (level.bombTimer * 1000) ) );
-	
 	destroyedObj.visuals[0] thread maps\mp\gametypes\_globallogic::playTickingSound();
-	
 	starttime = gettime();
 	bombTimerWait();
-	
 	setDvar( "ui_bomb_timer", 0 );
 	destroyedObj.visuals[0] maps\mp\gametypes\_globallogic::stopTickingSound();
-
 	if ( !level.bombPlanted )
 	{
 		if ( level.hotPotato )
@@ -745,66 +566,39 @@ bombPlanted( destroyedObj, team )
 		}
 		return;
 	}
-	/*
-	for ( index = 0; index < level.players.size; index++ )
-	{
-		player = level.players[index];
-		if ( player.pers["team"] == team )
-			player thread maps\mp\gametypes\_hud_message::oldNotifyMessage( "Your team scored!", undefined, undefined, (0, 1, 0) );
-		else if ( player.pers["team"] == level.otherTeam[team] )
-			player thread maps\mp\gametypes\_hud_message::oldNotifyMessage( "Enemy team scored!", undefined, undefined, (1, 0, 0) );
-	}
-	*/
 	explosionOrigin = level.sabBomb.visuals[0].origin+(0,0,12);
 	level.bombExploded = true;	
-	
 	if ( isdefined( level.bombowner ) )
 		destroyedObj.visuals[0] radiusDamage( explosionOrigin, 512, 200, 20, level.bombowner, "MOD_EXPLOSIVE", "briefcase_bomb_mp" );
 	else
 		destroyedObj.visuals[0] radiusDamage( explosionOrigin, 512, 200, 20, undefined, "MOD_EXPLOSIVE", "briefcase_bomb_mp" );
-	
 	rot = randomfloat(360);
 	explosionEffect = spawnFx( level._effect["bombexplosion"], explosionOrigin + (0,0,50), (0,0,1), (cos(rot),sin(rot),0) );
 	triggerFx( explosionEffect );
-	
 	thread playSoundinSpace( "exp_suitcase_bomb_main", explosionOrigin );
-	
 	if ( isDefined( destroyedObj.exploderIndex ) )
 		exploder( destroyedObj.exploderIndex );
-	
-	//[[level._setTeamScore]]( team, [[level._getTeamScore]]( team ) + 1 );
-	
 	setGameEndTime( 0 );
-	
 	if ( isdefined(level.bombowner) )
 		level.bombowner setStatLBByName( "sabotage", 1, "Targets Destroyed" );
-
 	level.bombZones["allies"] maps\mp\gametypes\_gameobjects::setVisibleTeam( "none" );
 	level.bombZones["axis"] maps\mp\gametypes\_gameobjects::setVisibleTeam( "none" );
 	wait 3;
-	
-	// end the round without resetting the timer
 	sd_endGame( team, game["strings"]["target_destroyed"] );
 }
-
-
 playSoundinSpace( alias, origin )
 {
 	org = spawn( "script_origin", origin );
 	org.origin = origin;
 	org playSound( alias  );
-	wait 10; // MP doesn't have "sounddone" notifies =(
+	wait 10; 
 	org delete();
 }
-
-
 bombTimerWait()
 {
 	level endon("bomb_defused");
 	wait level.bombTimer;
 }
-
-
 resetBombsite()
 {
 	self maps\mp\gametypes\_gameobjects::allowUse( "enemy" );
@@ -819,7 +613,6 @@ resetBombsite()
 	self maps\mp\gametypes\_gameobjects::setVisibleTeam( "none" );
 	self.useWeapon = "briefcase_bomb_mp";
 }
-
 setUpForDefusing()
 {
 	self maps\mp\gametypes\_gameobjects::allowUse( "friendly" );
@@ -833,8 +626,6 @@ setUpForDefusing()
 	self maps\mp\gametypes\_gameobjects::set3DIcon( "enemy", "waypoint_defend" );
 	self maps\mp\gametypes\_gameobjects::setVisibleTeam( "any" );
 }
-
-
 bombDefused( object )
 {
 	setDvar( "ui_bomb_timer", 0 );
@@ -842,94 +633,15 @@ bombDefused( object )
 	level.bombPlanted = false;
 	if ( !level.inOvertime )
 		level.timeLimitOverride = false;
-
 	level notify("bomb_defused");	
 }
-
-
-//onEndGame( winningTeam )
-//{
-//	if ( isdefined( winningTeam ) && (winningTeam == "allies" || winningTeam == "axis") )
-//		[[level._setTeamScore]]( winningTeam, [[level._getTeamScore]]( winningTeam ) + 1 );	
-//}
-
-// spawning influencer generation callback
-// return an array of influencer structs
 sabPlayerSpawnGenerateInfluencers(
-	player_entity, // the player who wants to spawn
-	spawn_influencers) // reference to an influencer array struct
+	player_entity, 
+	spawn_influencers) 
 {
-/* ###stefan $REMOVED decided we don't want any special influencers for sabotage
-	// sabotage: influencer around friendly base
-	sab_friendly_base_influencer_score= level.spawnsystem.sab_friendly_base_influencer_score;
-	sab_friendly_base_influencer_score_curve= level.spawnsystem.sab_friendly_base_influencer_score_curve;
-	sab_friendly_base_influencer_radius= level.spawnsystem.sab_friendly_base_influencer_radius;
-	
-	// sabotage: influencer around enemy base
-	sab_enemy_base_influencer_score= level.spawnsystem.sab_enemy_base_influencer_score;
-	sab_enemy_base_influencer_score_curve= level.spawnsystem.sab_enemy_base_influencer_score_curve;
-	sab_enemy_base_influencer_radius= level.spawnsystem.sab_enemy_base_influencer_radius;
-	
-	// sabotage: negative influencer around carrier
-	sab_carrier_influencer_score= level.spawnsystem.sab_carrier_influencer_score;
-	sab_carrier_influencer_score_curve= level.spawnsystem.sab_carrier_influencer_score_curve;
-	sab_carrier_influencer_radius= level.spawnsystem.sab_carrier_influencer_radius;
-	
-	// create influencers around bases
-	for (team_index= 0; team_index<level.teams.size; team_index++)
-	{
-		base_team= level.teams[team_index];
-		bomb_zone= level.bombZones[base_team];
-		bomb_zone_trigger= bomb_zone.trigger;
-		bomb_zone_origin= bomb_zone_trigger GetOrigin();
-		
-		if (teams_have_enmity(player_entity.team, base_team))
-		{
-			score= sab_enemy_base_influencer_score;
-			score_curve= sab_enemy_base_influencer_score_curve;
-			radius= sab_enemy_base_influencer_radius;
-		}
-		else
-		{
-			score= sab_friendly_base_influencer_score;
-			score_curve= sab_friendly_base_influencer_score_curve;
-			radius= sab_friendly_base_influencer_radius;
-		}
-		
-		spawn_influencers.a[spawn_influencers.a.size]= create_sphere_influencer(
-			"game_mode", // type
-			( 1.0, 0.0, 0.0 ), // forward
-			( 0.0, 0.0, 1.0 ), // up
-			bomb_zone_origin, // origin
-			score, // score
-			score_curve, // score_curve
-			radius); // radius,
-	}
-	
-	// create influencer around carrier
-	if (IsDefined(level.sabBomb) &&
-		IsDefined(level.sabBomb.carrier))
-	{
-		carrier_angles= level.sabBomb.carrier GetAngles();
-		carrier_position= level.sabBomb.carrier GetOrigin();
-		
-		spawn_influencers.a[spawn_influencers.a.size]= create_sphere_influencer(
-			"game_mode", // type
-			AnglesToForward(carrier_angles), // forward
-			AnglesToUp(carrier_angles), // up
-			carrier_position, // origin
-			sab_carrier_influencer_score, // score
-			sab_carrier_influencer_score_curve, // score_curve
-			sab_carrier_influencer_radius); // radius
-	}*/
-	
 	return spawn_influencers;
 }
-
 sd_endGame( winningTeam, endReasonText )
 {
-	//if ( isdefined( winningTeam ) )
-	//	[[level._setTeamScore]]( winningTeam, [[level._getTeamScore]]( winningTeam ) + 1 );
-	
 	thread maps\mp\gametypes\_finalkills::endGame( winningTeam, endReasonText );
 }
