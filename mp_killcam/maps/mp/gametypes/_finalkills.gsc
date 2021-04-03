@@ -17,7 +17,13 @@ OnPlayerConnect()
     for(;;)
     {
         level waittill("connected", player);
-	player SetClientDvar("ui_ShowMenuOnly", "");
+		player SetClientDvar("ui_ShowMenuOnly", "");
+		if(level.hardcoreMode){
+		player setClientDvar( "ui_hud_hardcore", 1 );
+		}
+		else{
+		player setClientDvar( "ui_hud_hardcore", 0 );
+		}
         player thread beginFK();
     }
 }    
