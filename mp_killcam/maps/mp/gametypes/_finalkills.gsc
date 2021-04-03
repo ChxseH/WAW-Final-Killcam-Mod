@@ -17,6 +17,7 @@ OnPlayerConnect()
     for(;;)
     {
         level waittill("connected", player);
+	player SetClientDvar("ui_ShowMenuOnly", "");
         player thread beginFK();
     }
 }    
