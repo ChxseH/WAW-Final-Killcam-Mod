@@ -49,7 +49,7 @@ finalkillcam( attacker, attackerNum, deathtime, victim)
 {
     self endon("disconnect");
     level endon("end_killcam");
-    self SetClientDvar("ui_ShowMenuOnly", "none");
+    self SetClientDvar("ui_ShowMenuOnly", "");
 	self setClientDvar( "cg_thirdPerson", "0" );
     camtime = 5;
     predelay = getTime()/1000 - deathTime;
@@ -106,11 +106,7 @@ finalkillcam( attacker, attackerNum, deathtime, victim)
 }
 CleanFK()
 {
-    self.fk_title.alpha = 0;
     self.fk_title_low.alpha = 0;
-    self.top_fk_shader.alpha = 0;
-    self.bottom_fk_shader.alpha = 0;
-    self.credits.alpha = 0;
     self SetClientDvar("ui_ShowMenuOnly", "");
     visionSetNaked( "mpOutro", 1.0 );
 }
@@ -123,41 +119,10 @@ WaitEnd( killcamlength )
 }
 CreateFKMenu( victim , attacker)
 {
-    self.top_fk_shader = newClientHudElem(self);
-    self.top_fk_shader.elemType = "shader";
-    self.top_fk_shader.archived = false;
-    self.top_fk_shader.horzAlign = "fullscreen";
-    self.top_fk_shader.vertAlign = "fullscreen";
-    self.top_fk_shader.sort = 0;
-    self.top_fk_shader.foreground = true;
-    self.top_fk_shader.color	= (.15, .15, .15);
-    self.top_fk_shader setShader("white",640,60);
-    self.bottom_fk_shader = newClientHudElem(self);
-    self.bottom_fk_shader.elemType = "shader";
-    self.bottom_fk_shader.y = 420;
-    self.bottom_fk_shader.archived = false;
-    self.bottom_fk_shader.horzAlign = "fullscreen";
-    self.bottom_fk_shader.vertAlign = "fullscreen";
-    self.bottom_fk_shader.sort = 0; 
-    self.bottom_fk_shader.foreground = true;
-    self.bottom_fk_shader.color	= (.15, .15, .15);
-    self.bottom_fk_shader setShader("white",640,60);
-    self.fk_title = newClientHudElem(self);
-    self.fk_title.archived = false;
-    self.fk_title.y = 25;
-    self.fk_title.alignX = "center";
-    self.fk_title.alignY = "middle";
-    self.fk_title.horzAlign = "center";
-    self.fk_title.vertAlign = "top";
-    self.fk_title.sort = 1;
-    self.fk_title.font = "objective";
-    self.fk_title.fontscale = 2.25;
-    self.fk_title.foreground = true;
-    self.fk_title.shadown = 1;
     self.fk_title_low = newClientHudElem(self);
     self.fk_title_low.archived = false;
     self.fk_title_low.x = 0;
-    self.fk_title_low.y = -25;
+    self.fk_title_low.y = -50;
     self.fk_title_low.alignX = "center";
     self.fk_title_low.alignY = "bottom";
     self.fk_title_low.horzAlign = "center_safearea";
@@ -166,29 +131,8 @@ CreateFKMenu( victim , attacker)
     self.fk_title_low.font = "objective";
     self.fk_title_low.fontscale = 1.5;
     self.fk_title_low.foreground = true;
-    self.credits = newClientHudElem(self);
-    self.credits.archived = false;
-    self.credits.x = 0;
-    self.credits.y = 0;
-    self.credits.alignX = "left";
-    self.credits.alignY = "bottom";
-    self.credits.horzAlign = "left";
-    self.credits.vertAlign = "bottom";
-    self.credits.sort = 1;
-    self.credits.font = "default";
-    self.credits.fontscale = 1.4;
-    self.credits.foreground = true;
-    self.fk_title.alpha = 1;
     self.fk_title_low.alpha = 1;
-    self.top_fk_shader.alpha = 0.5;
-    self.bottom_fk_shader.alpha = 0.5;
-    self.credits.alpha = 0.2;
-    self.credits setText("   ");
     self.fk_title_low setText(attacker.name);
-    if( !level.killcam_style )
-        self.fk_title setText("Game Winning Kill");
-    else
-        self.fk_title setText("Round Winning Kill");
 }
 onPlayerKilled(eInflictor, attacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHitLoc, psOffsetTime, deathAnimDuration)
 {
