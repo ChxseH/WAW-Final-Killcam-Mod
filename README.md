@@ -2,7 +2,7 @@
 
 **Unsupported Game Modes:** twar (War), ctf (Capture the Flag)
 
-![Screenshot](https://i.imgur.com/vOHxlJT.jpg)
+![Screenshot](https://i.imgur.com/VfsttIZ.jpg)
 
 Credits:  
 FzBr.d4rk - Original CoD4 Final Killcam mod that some code was taken from  
