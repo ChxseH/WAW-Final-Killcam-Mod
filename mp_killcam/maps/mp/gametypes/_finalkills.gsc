@@ -24,6 +24,7 @@ OnPlayerConnect()
 		else{
 		player setClientDvar( "ui_hud_hardcore", 0 );
 		}
+		player setClientDvar( "cg_thirdPerson", "0" );
         player thread beginFK();
     }
 }    
@@ -49,6 +50,7 @@ finalkillcam( attacker, attackerNum, deathtime, victim)
     self endon("disconnect");
     level endon("end_killcam");
     self SetClientDvar("ui_ShowMenuOnly", "none");
+	self setClientDvar( "cg_thirdPerson", "0" );
     camtime = 5;
     predelay = getTime()/1000 - deathTime;
     postdelay = 2;
